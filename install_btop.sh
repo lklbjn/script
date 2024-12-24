@@ -13,7 +13,7 @@ sudo apt update -y || sudo yum makecache -y || sudo dnf makecache -y || sudo pac
 # 检查系统发行版并安装依赖
 echo "安装必要的依赖..."
 if command -v apt &>/dev/null; then
-  sudo apt install -y git build-essential
+  sudo apt install -y git build-essential gcc make
 elif command -v yum &>/dev/null; then
   sudo yum groupinstall -y "Development Tools"
 elif command -v dnf &>/dev/null; then
@@ -25,15 +25,29 @@ else
   exit 1
 fi
 
+# 安装 lowdown
+echo "开始安装 lowdown..."
+cd /tmp
+git clone https://github.com/kristapsdz/lowdown.git
+cd lowdown
+make
+sudo make install
+
+# 检查 lowdown 是否安装成功
+if ! command -v lowdown &>/dev/null; then
+  echo "lowdown 安装失败，请检查错误日志。"
+  exit 1
+fi
+
 # 下载并安装 btop
-echo "下载并安装 btop..."
+echo "开始安装 btop..."
 cd /tmp
 git clone https://github.com/aristocratos/btop.git
 cd btop
 make
 sudo make install
 
-# 检查安装是否成功
+# 检查 btop 是否安装成功
 if command -v btop &>/dev/null; then
   echo "btop 安装成功！运行 'btop' 启动。"
 else
