@@ -13,7 +13,7 @@ sudo apt update -y || sudo yum makecache -y || sudo dnf makecache -y || sudo pac
 # 检查系统发行版并安装依赖
 echo "安装必要的依赖..."
 if command -v apt &>/dev/null; then
-  sudo apt install -y git build-essential gcc make
+  sudo apt install -y git build-essential
 elif command -v yum &>/dev/null; then
   sudo yum groupinstall -y "Development Tools"
 elif command -v dnf &>/dev/null; then
