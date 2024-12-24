@@ -64,21 +64,40 @@ binary_install() {
       ;;
   esac
 
+  # 检查并安装 bzip2（依赖）
+  echo "检查是否安装 bzip2..."
+  if ! command -v bzip2 &>/dev/null; then
+    echo "bzip2 未安装，正在安装..."
+    if command -v apt &>/dev/null; then
+      sudo apt update -y
+      sudo apt install -y bzip2
+    elif command -v yum &>/dev/null; then
+      sudo yum install -y bzip2
+    elif command -v dnf &>/dev/null; then
+      sudo dnf install -y bzip2
+    elif command -v pacman &>/dev/null; then
+      sudo pacman -S --noconfirm bzip2
+    else
+      echo "无法检测到支持的包管理器，请手动安装 bzip2。"
+      exit 1
+    fi
+  fi
+
   # 下载二进制文件
   echo "检测到架构：$ARCH"
   VERSION=$(curl -s https://api.github.com/repos/aristocratos/btop/releases/latest | grep "tag_name" | cut -d '"' -f 4)
   echo "最新版本：$VERSION"
-  DOWNLOAD_URL="https://github.com/aristocratos/btop/releases/download/$VERSION/btop-$VERSION-linux-$ARCH.tbz"
+  DOWNLOAD_URL="https://github.com/aristocratos/btop/releases/download/$VERSION/btop-$ARCH-linux-musl.tbz"
   echo "下载地址：$DOWNLOAD_URL"
 
   cd /tmp
   curl -LO "$DOWNLOAD_URL"
 
   # 解压并安装
-  echo "解压并安装 btop..."
-  tar -xjf btop-*.tbz
-  cd btop
-  sudo make install
+  echo "解压并安装 btop-$ARCH-linux-musl.tbz"
+  tar -xjf btop-$ARCH-linux-musl.tbz
+  sudo mv btop/bin/btop /usr/local/bin/
+  sudo chmod +x /usr/local/bin/btop
 
   # 检查是否安装成功
   if command -v btop &>/dev/null; then
@@ -114,9 +133,14 @@ homebrew_install() {
 # 主程序：选择安装方式
 echo "请选择安装方式："
 echo "1) 编译安装"
-echo "2) 二进制安装"
+echo "2) 二进制安装(推荐)"
 echo "3) Homebrew 安装"
 read -p "请输入选项 (1/2/3): " choice
+
+# 如果没有输入，默认选择 2（二进制安装）
+if [ -z "$choice" ]; then
+  choice=2
+fi
 
 case "$choice" in
   1)
@@ -130,6 +154,6 @@ case "$choice" in
     ;;
   *)
     echo "无效选项，请重新运行脚本并选择 1、2 或 3。"
-    exit 1
+    binary_install
     ;;
 esac
