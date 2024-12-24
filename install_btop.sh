@@ -6,81 +6,33 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# 更新软件包索引
-echo "更新软件包索引..."
+# 更新软件包索引并安装必要的依赖
+echo "更新软件包索引并安装必要的依赖..."
 if command -v apt &>/dev/null; then
   sudo apt update -y
+  sudo apt install -y build-essential procps curl file git
 elif command -v yum &>/dev/null; then
-  sudo yum makecache -y
+  sudo yum install -y gcc gcc-c++ make procps-ng curl file git
 elif command -v dnf &>/dev/null; then
-  sudo dnf makecache -y
+  sudo dnf install -y gcc gcc-c++ make procps-ng curl file git
 elif command -v pacman &>/dev/null; then
-  sudo pacman -Sy
+  sudo pacman -S --noconfirm base-devel procps-ng curl file git
 else
   echo "无法检测到支持的包管理器。请手动安装依赖。"
   exit 1
 fi
 
-# 安装必要的依赖
-echo "安装必要的依赖..."
-if command -v apt &>/dev/null; then
-  sudo apt install -y git build-essential gcc make curl
-elif command -v yum &>/dev/null; then
-  sudo yum groupinstall -y "Development Tools"
-  sudo yum install -y git curl
-elif command -v dnf &>/dev/null; then
-  sudo dnf groupinstall -y "Development Tools"
-  sudo dnf install -y git curl
-elif command -v pacman &>/dev/null; then
-  sudo pacman -S --noconfirm base-devel git curl
-else
-  echo "无法检测到支持的包管理器。请手动安装依赖。"
-  exit 1
-fi
+# 安装 Homebrew
+echo "安装 Homebrew..."
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# 安装 lowdown
-echo "尝试通过包管理器安装 lowdown..."
-if command -v apt &>/dev/null; then
-  if ! sudo apt install -y lowdown; then
-    echo "通过 apt 安装 lowdown 失败，尝试从源码安装..."
-    cd /tmp
-    git clone https://github.com/kristapsdz/lowdown.git
-    cd lowdown
-    ./configure
-    make
-    sudo make install
-  fi
-elif command -v yum &>/dev/null || command -v dnf &>/dev/null; then
-  echo "目前 yum/dnf 没有直接支持 lowdown 的包，尝试从源码安装..."
-  cd /tmp
-  git clone https://github.com/kristapsdz/lowdown.git
-  cd lowdown
-  ./configure
-  make
-  sudo make install
-else
-  echo "无法通过包管理器安装 lowdown，尝试从源码安装..."
-  cd /tmp
-  git clone https://github.com/kristapsdz/lowdown.git
-  cd lowdown
-  ./configure
-  make
-  sudo make install
-fi
+# 配置 Homebrew 环境变量
+echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
-# 检查 lowdown 是否安装成功
-if ! command -v lowdown &>/dev/null; then
-  echo "lowdown 安装失败，请检查错误日志。"
-  exit 1
-fi
-
-# 下载并安装 btop
-echo "开始安装 btop..."
-cd /tmp
-git clone https://github.com/aristocratos/btop.git
-cd btop
-make
-sudo make install
+# 使用 Homebrew 安装 btop
+echo "使用 Homebrew 安装 btop..."
+brew install btop
 
 # 检查 btop 是否安装成功
 if command -v btop &>/dev/null; then
