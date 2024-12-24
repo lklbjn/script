@@ -133,7 +133,7 @@ homebrew_install() {
 # 主程序：选择安装方式
 echo "请选择安装方式："
 echo "1) 编译安装"
-echo "2) 二进制安装(推荐)"
+echo "2) 二进制安装(没有GPU支持)"
 echo "3) Homebrew 安装"
 read -p "请输入选项 (1/2/3): " choice
 
