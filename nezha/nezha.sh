@@ -372,7 +372,7 @@ install_agent() {
 
     echo "正在下载监控端"
     if [ -z "$CN" ]; then
-        NZ_AGENT_URL="https://${GITHUB_URL}/lklbjn//nezha/agent/${_version}/nezha-agent_linux_${os_arch}.zip"
+        NZ_AGENT_URL="raw.githubusercontent.com/lklbjn/script/master/nezha/agent/${_version}/nezha-agent_linux_${os_arch}.zip"
     else
         NZ_AGENT_URL="https://view.ciallo.xin/download/nezha/nezha-agent_linux_${os_arch}.zip"
     fi
